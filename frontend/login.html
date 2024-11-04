@@ -6,14 +6,39 @@
     <title>Galeria Das Pequenas Estrelas</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"></script>
 </head>
 <body>
-    <div class="config"> <img src="engrenagem.png"></div>
+    <!-- Ícone de Configurações -->
+    <div class="config" onclick="goToSettings()"> 
+        <img src="engrenagem.png" alt="Configurações">
+    </div>
+    <!-- Conteúdo principal -->
     <div class="container">
         <img src="coinreal.png" alt="Galeria Das Pequenas Estrelas" class="title">
         <button onclick="window.location.href='aluno.html';" class="button largo-btn"><p>Aluno</p></button>
-        <button onclick="window.location.href='professor.html';" class="button largo-btn"><p>Professor</p></button>
-        
+        <button onclick="showLoginModal()" class="button largo-btn"><p>Professor</p></button>
     </div>
+
+    <!-- Modal de Login e Cadastro para Professor -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Login do Professor</h2>
+            <form id="authForm">
+                <label for="username">Email:</label>
+                <input type="email" id="username" name="username" required>
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit" class="button align-btn" id="authButton">Entrar</button>
+                <p id="toggleForm" onclick="toggleForm()">Novo por aqui? <a href="#">Cadastre-se</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="login.js"></script>
 </body>
 </html>

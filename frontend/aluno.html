@@ -14,6 +14,7 @@
     <button class="new-post-it-btn" onclick="openEditModal()">Novo Post-It</button>
 
     <div class="edit-modal" id="editModal">
+        <span class="close-btn" onclick="closeEditModal()">×</span>
         <label for="nameInput">Nome:</label>
         <input type="text" id="nameInput">
 
@@ -38,7 +39,6 @@
 
     <div class="room-select">
         <select class="room-list" id="roomSelect" onchange="changeRoom()"></select>
-        <button class="add-room-btn" onclick="addRoom()">Adicionar Sala</button>
     </div>
 
     <script src="script_aluno.js"></script>

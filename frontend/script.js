@@ -195,3 +195,11 @@ async function deleteRoom() {
         }
     }
 }
+
+function confirmCloseModal() {
+    if (confirm("Deseja salvar as alterações antes de sair?")) {
+        savePostIt();
+    } else {
+        closeEditModal();
+    }
+}
