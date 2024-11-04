@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post-Its Interativos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+    <h1>Post-Its Interativos</h1>
+    <div class="container" id="postItContainer"></div>
+
+    <button class="new-post-it-btn" onclick="openEditModal()">Novo Post-It</button>
+
+    <div class="edit-modal" id="editModal">
+        <label for="nameInput">Nome:</label>
+        <input type="text" id="nameInput">
+
+        <label for="classInput">Turma:</label>
+        <input type="text" id="classInput">
+
+        <label for="shiftInput">Turno:</label>
+        <input type="text" id="shiftInput">
+
+        <label for="textContent">Conteúdo:</label>
+        <textarea id="textContent" rows="3"></textarea>
+
+        <div class="color-select">
+            <div class="color-option" style="background-color: yellow;" onclick="selectColor('yellow')"></div>
+            <div class="color-option" style="background-color: pink;" onclick="selectColor('pink')"></div>
+            <div class="color-option" style="background-color: lightblue;" onclick="selectColor('lightblue')"></div>
+            <div class="color-option" style="background-color: lightgreen;" onclick="selectColor('lightgreen')"></div>
+        </div>
+
+        <button class="save-btn" onclick="savePostIt()">Salvar</button>
+        <button class="delete-btn" onclick="deletePostIt()">Excluir</button>
+    </div>
+
+    <div class="room-select">
+        <select class="room-list" id="roomSelect" onchange="changeRoom()"></select>
+        <button class="add-room-btn" onclick="addRoom()">Adicionar Sala</button>
+        <button class="delete-room-btn" onclick="deleteRoom()">Excluir Sala</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

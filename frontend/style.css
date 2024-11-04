@@ -1,0 +1,88 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', sans-serif;
+    color: #fff;
+}
+
+body {
+    background-image: url('fundohumanismo.gif'); 
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.config {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.config img {
+    width: 85px; 
+    cursor: pointer;
+}
+
+.container {
+    text-align: center;
+    max-width: 90%;
+}
+
+.title {
+    zoom: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 45px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+   
+}
+
+.button {
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    color: #fff;
+    background-color: #f9eac0;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: block; 
+    width: 80%; 
+    max-width: 400px; 
+}
+
+.button:hover {
+    background-color: #dbacd9;
+}
+
+.button p {
+    font-family: 'Press Start 2P', sans-serif ;
+    font-weight: bold;
+    font-size: 22px;
+    background: rgb(63,94,251);
+background: linear-gradient(185deg, rgba(63,94,251,1) 0%, rgba(123,86,205,1) 37%, rgba(252,70,107,1) 100%);  -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    
+}
+
+.largo-btn {
+    width: 100%; 
+    max-width: 300px; 
+    margin: 1rem auto;
+    
+}
