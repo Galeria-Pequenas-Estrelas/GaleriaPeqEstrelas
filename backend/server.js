@@ -1,18 +1,18 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const db = new sqlite3.Database('./database.db');
+const db = new Database('./database/database.db'); // Conexão com better-sqlite3
 const PORT = 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// Criação da tabela de Post-Its
-db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS postIts (
+// Inicializa a tabela de Post-Its (criação única)
+db.prepare(`
+    CREATE TABLE IF NOT EXISTS postIts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         class TEXT,
@@ -20,88 +20,85 @@ db.serialize(() => {
         content TEXT,
         color TEXT,
         room TEXT
-    )`, (err) => {
-        if (err) {
-            console.error('Erro ao criar tabela:', err.message);
-        } else {
-            console.log('Tabela de Post-Its criada ou já existe.');
-        }
-    });
-});
+    )
+`).run();
 
 // Endpoint para obter post-its de uma sala
 app.get('/api/postIts', (req, res) => {
     const room = req.query.room || 'Sala1';
-    db.all(`SELECT * FROM postIts WHERE room = ?`, [room], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json(rows);
-    });
+    try {
+        const postIts = db.prepare(`SELECT * FROM postIts WHERE room = ?`).all(room);
+        res.json(postIts);
+    } catch (err) {
+        console.error('Erro ao obter post-its:', err.message);
+        res.status(500).json({ error: 'Erro ao obter post-its' });
+    }
 });
 
 // Endpoint para adicionar um novo post-it
 app.post('/api/postIts', (req, res) => {
     const { name, class: className, shift, content, color, room } = req.body;
-    db.run(`INSERT INTO postIts (name, class, shift, content, color, room) VALUES (?, ?, ?, ?, ?, ?)`, 
-        [name, className, shift, content, color, room], 
-        function(err) {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
-            console.log('Post-It inserido:', { id: this.lastID, name, class: className, shift, content, color, room });
-            res.status(201).json({ id: this.lastID, name, class: className, shift, content, color, room });
-        }
-    );
+    try {
+        const info = db.prepare(`
+            INSERT INTO postIts (name, class, shift, content, color, room) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `).run(name, className, shift, content, color, room);
+        
+        res.status(201).json({ id: info.lastInsertRowid, name, class: className, shift, content, color, room });
+    } catch (err) {
+        console.error('Erro ao adicionar post-it:', err.message);
+        res.status(500).json({ error: 'Erro ao adicionar post-it' });
+    }
 });
 
 // Endpoint para deletar um post-it
 app.delete('/api/postIts/:id', (req, res) => {
     const id = req.params.id;
-    db.run(`DELETE FROM postIts WHERE id = ?`, id, function(err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        console.log(`Post-It com ID ${id} deletado.`);
+    try {
+        db.prepare(`DELETE FROM postIts WHERE id = ?`).run(id);
         res.status(204).send();
-    });
+    } catch (err) {
+        console.error('Erro ao deletar post-it:', err.message);
+        res.status(500).json({ error: 'Erro ao deletar post-it' });
+    }
 });
 
 // Endpoint para obter todas as salas
 app.get('/api/rooms', (req, res) => {
-    const query = 'SELECT DISTINCT room FROM postIts';
-    db.all(query, [], (err, rows) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        }
-        res.json(rows.map(row => row.room));
-    });
+    try {
+        const rooms = db.prepare(`SELECT DISTINCT room FROM postIts`).all();
+        res.json(rooms.map(row => row.room));
+    } catch (err) {
+        console.error('Erro ao obter salas:', err.message);
+        res.status(500).send({ error: 'Erro ao obter salas' });
+    }
 });
 
-// Endpoint para adicionar uma nova sala (caso queira adicionar salas explicitamente)
+// Endpoint para adicionar uma nova sala
 app.post('/api/rooms', (req, res) => {
     const { room } = req.body;
     if (!room) {
         return res.status(400).json({ error: "O nome da sala não pode ser vazio." });
     }
-    db.run(`INSERT INTO postIts (room) VALUES (?)`, [room], function(err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
+    try {
+        db.prepare(`INSERT INTO postIts (room) VALUES (?)`).run(room);
         res.status(201).json({ room });
-    });
+    } catch (err) {
+        console.error('Erro ao adicionar sala:', err.message);
+        res.status(500).json({ error: 'Erro ao adicionar sala' });
+    }
 });
 
 // Endpoint para deletar uma sala e todos os seus post-its
 app.delete('/api/rooms/:room', (req, res) => {
     const room = req.params.room;
-    db.run(`DELETE FROM postIts WHERE room = ?`, [room], function(err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        console.log(`Sala '${room}' e seus post-its foram deletados.`);
+    try {
+        db.prepare(`DELETE FROM postIts WHERE room = ?`).run(room);
         res.status(204).send();
-    });
+    } catch (err) {
+        console.error('Erro ao deletar sala:', err.message);
+        res.status(500).json({ error: 'Erro ao deletar sala' });
+    }
 });
 
 // Inicia o servidor
