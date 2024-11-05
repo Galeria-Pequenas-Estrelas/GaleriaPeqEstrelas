@@ -7,8 +7,47 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"></script>
+    <script type="module">
+        // Importando o Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBsL4WXPd1gTyA1_YXdrJRpGwKaCQ5aiJA",
+            authDomain: "loginprofessorestrelas.firebaseapp.com",
+            projectId: "loginprofessorestrelas",
+            storageBucket: "loginprofessorestrelas.appspot.com",
+            messagingSenderId: "879951998491",
+            appId: "1:879951998491:web:ff48ff270cb243cec712be",
+            measurementId: "G-W595XKCN91"
+        };
+
+        // Inicializando o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Função de login (declarada no escopo global)
+        window.loginUser = async function() {
+            const email = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                alert("Login realizado com sucesso!");
+                // Redirecionando para a página do professor
+                window.location.href = "professor.html";
+            } catch (error) {
+                const errorMessage = error.message;
+                alert(`Erro ao fazer login: ${errorMessage}`);
+            }
+        }
+
+        // Função para fechar o modal de login
+        window.closeModal = function() {
+            document.getElementById("loginModal").style.display = "none";
+        }
+    </script>
 </head>
 <body>
     <!-- Ícone de Configurações -->
@@ -19,15 +58,15 @@
     <div class="container">
         <img src="coinreal.png" alt="Galeria Das Pequenas Estrelas" class="title">
         <button onclick="window.location.href='aluno.html';" class="button largo-btn"><p>Aluno</p></button>
-        <button onclick="showLoginModal()" class="button largo-btn"><p>Professor</p></button>
+        <button onclick="document.getElementById('loginModal').style.display='block';" class="button largo-btn"><p>Professor</p></button>
     </div>
 
     <!-- Modal de Login e Cadastro para Professor -->
-    <div id="loginModal" class="modal">
+    <div id="loginModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <h2 id="modalTitle">Login do Professor</h2>
-            <form id="authForm">
+            <form id="authForm" onsubmit="event.preventDefault(); loginUser();">
                 <label for="username">Email:</label>
                 <input type="email" id="username" name="username" required>
                 <label for="password">Senha:</label>
