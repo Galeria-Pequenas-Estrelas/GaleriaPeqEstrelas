@@ -79,41 +79,22 @@ async function savePostIt() {
     const content = document.getElementById('textContent').value;
 
     const postItData = {
-        name,
-        class: className,
-        shift,
-        content,
-        color: selectedColor,
-        room: currentRoom
+        name, class: className, shift, content, color: selectedColor, room: currentRoom
     };
 
     try {
         if (editingPostIt) {
-            // Edição de um Post-It existente
-            const postId = editingPostIt.dataset.id; // Pega o ID do post-it a ser editado
-            const response = await fetch(`http://localhost:3001/api/postIts/${postId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(postItData)
-            });
-
-            if (response.ok) {
-                // Atualiza visualmente o post-it na página
-                editingPostIt.dataset.name = name;
-                editingPostIt.dataset.class = className;
-                editingPostIt.dataset.shift = shift;
-                editingPostIt.dataset.content = content;
-                editingPostIt.style.backgroundColor = selectedColor;
-                editingPostIt.querySelector('p').textContent = content;
-            } else {
-                console.error('Erro ao editar Post-It:', await response.text());
-            }
+            editingPostIt.dataset.name = name;
+            editingPostIt.dataset.class = className;
+            editingPostIt.dataset.shift = shift;
+            editingPostIt.dataset.content = content;
+            editingPostIt.style.backgroundColor = selectedColor;
+            editingPostIt.querySelector('p').textContent = content;
         } else {
-            // Criação de um novo Post-It
             const response = await fetch('http://localhost:3001/api/postIts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(postItData)
+                body: JSON.stringify(postItData),
             });
 
             if (response.ok) {
@@ -131,25 +112,31 @@ async function savePostIt() {
     closeEditModal();
 }
 
-
 function createPostItElement(id, data) {
-    const postIt = document.createElement('div');
-    postIt.className = 'post-it';
-    postIt.dataset.id = id;
-    postIt.dataset.name = data.name;
-    postIt.dataset.class = data.class;
-    postIt.dataset.shift = data.shift;
-    postIt.dataset.content = data.content;
-    postIt.style.backgroundColor = data.color;
-    
-    postIt.innerHTML = `
-        <p>${data.content}</p>
-        <p class="post-it-name">${data.name}</p>
-    `;
-    
-    postIt.onclick = () => openEditModal(postIt);
-    return postIt;
+    const postItElement = document.createElement('div');
+    postItElement.className = 'post-it';
+    postItElement.dataset.id = id;
+    postItElement.dataset.name = data.name;
+    postItElement.dataset.content = data.content;
+    postItElement.style.backgroundColor = data.color;
+
+    const contentElement = document.createElement('p');
+    contentElement.textContent = data.content;
+
+    const nameElement = document.createElement('span');
+    nameElement.className = 'post-it-name';
+    nameElement.textContent = data.name;
+
+    postItElement.appendChild(contentElement);
+    postItElement.appendChild(nameElement);
+
+    postItElement.addEventListener('click', function () {
+        openEditModal(postItElement);
+    });
+
+    return postItElement;
 }
+
 
 function selectColor(color) {
     selectedColor = color;

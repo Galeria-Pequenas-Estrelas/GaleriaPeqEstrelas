@@ -42,23 +42,36 @@ body {
     background-color: yellow;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
+    justify-content: flex-start; 
+    overflow: hidden; 
     text-align: center;
     transition: transform 0.3s;
 }
+
 
 .post-it:hover {
     transform: scale(1.05);
 }
 
 .post-it p {
-    flex: 1;
-    overflow-y: auto;
+    flex-grow: 1;
     word-wrap: break-word;
     margin: 0;
     padding: 5px;
     color: #333;
+    white-space: pre-wrap;
+    overflow: visible;
+}
+
+.post-it .post-it-name {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+    padding: 3px;
+    border-radius: 3px;
+    width: 100%;
+    word-wrap: break-word;
+    text-align: center;
 }
 
 .new-post-it-btn {
