@@ -33,17 +33,17 @@ body {
 
 .post-it {
     width: 150px;
-    height: 150px;
+    min-height: 150px;
     padding: 10px;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    overflow: hidden;
     position: relative;
-    color: #333;
+    background-color: yellow;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
     text-align: center;
     transition: transform 0.3s;
 }
@@ -53,7 +53,12 @@ body {
 }
 
 .post-it p {
+    flex: 1;
+    overflow-y: auto;
+    word-wrap: break-word;
     margin: 0;
+    padding: 5px;
+    color: #333;
 }
 
 .new-post-it-btn {
@@ -244,10 +249,9 @@ body {
 }
 
 .student-name {
-    position: absolute;
-    bottom: 10px; /* Ajuste a distância conforme necessário */
-    left: 10px;
     font-size: 12px;
-    color: #333;
+    margin-top: 10px;
     font-weight: bold;
+    color: #333;
+    text-align: center;
 }

@@ -51,9 +51,32 @@ app.post('/api/postIts', (req, res) => {
     }
 });
 
+// Novo endpoint para editar um post-it existente
+app.put('/api/postIts/:id', (req, res) => {
+    const { id } = req.params;
+    const { name, class: className, shift, content, color } = req.body;
+
+    try {
+        const result = db.prepare(`
+            UPDATE postIts 
+            SET name = ?, class = ?, shift = ?, content = ?, color = ? 
+            WHERE id = ?
+        `).run(name, className, shift, content, color, id);
+
+        if (result.changes > 0) {
+            res.status(200).json({ message: 'Post-It atualizado com sucesso!' });
+        } else {
+            res.status(404).json({ error: 'Post-It não encontrado' });
+        }
+    } catch (err) {
+        console.error('Erro ao editar post-it:', err.message);
+        res.status(500).json({ error: 'Erro ao editar post-it' });
+    }
+});
+
 // Endpoint para deletar um post-it
 app.delete('/api/postIts/:id', (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     try {
         db.prepare(`DELETE FROM postIts WHERE id = ?`).run(id);
         res.status(204).send();
@@ -91,7 +114,7 @@ app.post('/api/rooms', (req, res) => {
 
 // Endpoint para deletar uma sala e todos os seus post-its
 app.delete('/api/rooms/:room', (req, res) => {
-    const room = req.params.room;
+    const { room } = req.params;
     try {
         db.prepare(`DELETE FROM postIts WHERE room = ?`).run(room);
         res.status(204).send();
