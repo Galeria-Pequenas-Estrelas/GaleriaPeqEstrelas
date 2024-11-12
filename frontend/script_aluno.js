@@ -126,10 +126,15 @@ function createPostItElement(id, data) {
     postIt.dataset.shift = data.shift;
     postIt.dataset.content = data.content;
     postIt.style.backgroundColor = data.color;
-    postIt.innerHTML = `<p>${data.content}</p>`;
+    
+    postIt.innerHTML = `
+        <p>${data.content}</p>
+        <div class="student-name">${data.name}</div>  <!-- Nome do aluno -->
+    `;
     postIt.onclick = () => openEditModal(postIt);
     return postIt;
 }
+
 
 function selectColor(color) {
     selectedColor = color;
