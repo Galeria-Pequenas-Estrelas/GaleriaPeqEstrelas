@@ -8,14 +8,14 @@ function checkUserAuthentication() {
     const user = localStorage.getItem('user');
 
     if (!user) {
-        window.location.href = 'index.html';
+        window.location.href = '../index.html';
     }
 }
 
 // Função para realizar o logout
 function logout() {
     localStorage.removeItem('user');
-    window.location.href = '/index.html';
+    window.location.href = '../index.html';
 }
 
 // Função para carregar a página ao iniciar

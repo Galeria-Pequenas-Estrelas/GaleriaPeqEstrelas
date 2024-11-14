@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galeria Das Pequenas Estrelas</title>
-    <link rel="stylesheet" href="/frontend/style.css">
+    <link rel="stylesheet" href="frontend/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
     <script type="module">
@@ -40,7 +40,7 @@
                 localStorage.setItem('user', JSON.stringify(userCredential.user));
 
                 // Redirecionando para a página do professor
-                window.location.href = "/frontend/professor.html";
+                window.location.href = "frontend/professor.html";
             } catch (error) {
                 const errorMessage = error.message;
                 alert(`Erro ao fazer login: ${errorMessage}`);
@@ -56,9 +56,9 @@
 <body>
     <!-- Conteúdo principal -->
     <div class="container">
-        <img src="/frontend/coinreal.png" alt="Galeria Das Pequenas Estrelas" class="title">
+        <img src="frontend/coinreal.png" alt="Galeria Das Pequenas Estrelas" class="title">
         <!-- Botão para alunos -->
-        <button onclick="window.location.href='/frontend/aluno.html';" class="button largo-btn"><p>Aluno</p></button>
+        <button onclick="window.location.href='frontend/aluno.html';" class="button largo-btn"><p>Aluno</p></button>
         <!-- Botão para abrir o modal de login do professor -->
         <button onclick="document.getElementById('loginModal').style.display='block';" class="button largo-btn"><p>Professor</p></button>
     </div>
@@ -79,6 +79,5 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/frontend/"></script>
 </body>
 </html>
