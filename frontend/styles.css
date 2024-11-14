@@ -268,3 +268,27 @@ body {
     color: #333;
     text-align: center;
 }
+
+.logout-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    transition: background-color 0.3s, transform 0.5s ease;
+    z-index: 100; /* Para garantir que fique acima de outros elementos */
+}
+
+.logout-btn:hover {
+    background-color: #e53935;
+}
+
+.logout-btn:active {
+    transform: scale(1.1);
+}

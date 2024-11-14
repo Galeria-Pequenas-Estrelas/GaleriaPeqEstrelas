@@ -3,11 +3,38 @@ let selectedColor = 'yellow';
 let currentRoom = 'Sala1';
 const postIts = {};
 
+// Função para verificar a autenticação do usuário
+function checkUserAuthentication() {
+    const user = localStorage.getItem('user');
+
+    if (!user) {
+        window.location.href = 'login.html';
+    }
+}
+
+// Função para realizar o logout
+function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+}
+
+// Função para carregar a página ao iniciar
 document.addEventListener('DOMContentLoaded', async () => {
+    // Verifica se o usuário está autenticado
+    checkUserAuthentication();
+
+    // Adiciona o evento de logout ao botão
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logout);
+    }
+
+    // Carrega as salas e post-its
     await loadRooms();
     await loadPostIts();
 });
 
+// Função para carregar as salas
 async function loadRooms() {
     const roomSelect = document.getElementById('roomSelect');
     roomSelect.innerHTML = '';
@@ -31,6 +58,7 @@ async function loadRooms() {
     }
 }
 
+// Função para carregar os Post-Its
 async function loadPostIts() {
     try {
         const response = await fetch(`http://localhost:3001/api/postIts?room=${currentRoom}`);
@@ -46,6 +74,7 @@ async function loadPostIts() {
     }
 }
 
+// Função para abrir o modal de edição
 function openEditModal(postIt = null) {
     editingPostIt = postIt;
 
@@ -67,11 +96,13 @@ function openEditModal(postIt = null) {
     updateColorSelection();
 }
 
+// Função para fechar o modal de edição
 function closeEditModal() {
     editingPostIt = null;
     document.getElementById('editModal').style.display = 'none';
 }
 
+// Função para salvar ou atualizar um Post-It
 async function savePostIt() {
     const name = document.getElementById('nameInput').value;
     const className = document.getElementById('classInput').value;
@@ -112,6 +143,7 @@ async function savePostIt() {
     closeEditModal();
 }
 
+// Função para criar o elemento Post-It
 function createPostItElement(id, data) {
     const postItElement = document.createElement('div');
     postItElement.className = 'post-it';
@@ -136,7 +168,6 @@ function createPostItElement(id, data) {
 
     return postItElement;
 }
-
 
 function selectColor(color) {
     selectedColor = color;
@@ -178,7 +209,7 @@ async function addRoom(room = null) {
             body: JSON.stringify({ room: newRoom }),
         });
         await loadRooms();
-        changeRoom(newRoom); 
+        changeRoom(newRoom);
     } catch (error) {
         console.error('Erro ao adicionar sala:', error);
     }
@@ -196,7 +227,7 @@ async function deleteRoom() {
             await fetch(`http://localhost:3001/api/rooms/${currentRoom}`, {
                 method: 'DELETE',
             });
-            await loadRooms(); 
+            await loadRooms();
             const roomSelect = document.getElementById('roomSelect');
             currentRoom = roomSelect.options[0] ? roomSelect.options[0].value : 'Sala1';
             roomSelect.value = currentRoom;
