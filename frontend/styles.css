@@ -32,9 +32,10 @@ body {
 }
 
 .post-it {
-    width: 150px;
+    width: 320px;
     min-height: 150px;
-    padding: 10px;
+    max-width: 100%;
+    padding: 15px;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
@@ -43,7 +44,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start; 
-    overflow: hidden; 
+    overflow: hidden;
     text-align: center;
     transition: transform 0.3s;
 }
