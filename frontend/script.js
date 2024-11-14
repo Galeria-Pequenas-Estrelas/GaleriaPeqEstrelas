@@ -15,7 +15,7 @@ function checkUserAuthentication() {
 // Função para realizar o logout
 function logout() {
     localStorage.removeItem('user');
-    window.location.href = 'index.html';
+    window.location.href = '/index.html';
 }
 
 // Função para carregar a página ao iniciar
