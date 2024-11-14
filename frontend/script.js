@@ -6,7 +6,6 @@ const postIts = {};
 // Função para verificar a autenticação do usuário
 function checkUserAuthentication() {
     const user = localStorage.getItem('user');
-
     if (!user) {
         window.location.href = '../index.html';
     }
@@ -18,10 +17,9 @@ function logout() {
     window.location.href = '../index.html';
 }
 
-// Função para carregar a página ao iniciar
+// Carrega a página ao iniciar
 document.addEventListener('DOMContentLoaded', async () => {
-    // Verifica se o usuário está autenticado
-    checkUserAuthentication();
+    checkUserAuthentication();  // Verifica se o usuário está autenticado
 
     // Adiciona o evento de logout ao botão
     const logoutButton = document.getElementById('logoutButton');
@@ -29,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         logoutButton.addEventListener('click', logout);
     }
 
-    // Carrega as salas e post-its
+    // Carrega as salas e os post-its
     await loadRooms();
     await loadPostIts();
 });
@@ -37,12 +35,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Função para carregar as salas
 async function loadRooms() {
     const roomSelect = document.getElementById('roomSelect');
-    roomSelect.innerHTML = '';
+    roomSelect.innerHTML = '';  // Limpa as opções atuais
 
     try {
         const response = await fetch('http://localhost:3001/api/rooms');
-        const rooms = await response.json();
+        
+        // Verifica se a resposta foi bem-sucedida
+        if (!response.ok) {
+            console.error('Erro ao carregar salas:', response.statusText);
+            return;
+        }
 
+        // Obtém o JSON da resposta e acessa o array dentro da propriedade 'rooms'
+        const data = await response.json();
+        const rooms = data.rooms;
+
+        // Verifica se 'rooms' é um array
+        if (!Array.isArray(rooms)) {
+            console.error('Formato inesperado da resposta para salas:', rooms);
+            return;
+        }
+
+        // Verifica se há salas disponíveis
+        if (rooms.length === 0) {
+            console.warn('Nenhuma sala disponível.');
+            return;
+        }
+
+        // Adiciona as opções de sala ao select
         rooms.forEach(room => {
             const option = document.createElement('option');
             option.value = room;
@@ -50,7 +70,8 @@ async function loadRooms() {
             roomSelect.appendChild(option);
         });
 
-        currentRoom = localStorage.getItem('currentRoom') || rooms[0] || 'Sala1';
+        // Define a sala atual e salva no localStorage
+        currentRoom = localStorage.getItem('currentRoom') || rooms[0];
         roomSelect.value = currentRoom;
         localStorage.setItem('currentRoom', currentRoom);
     } catch (error) {
@@ -58,16 +79,19 @@ async function loadRooms() {
     }
 }
 
-// Função para carregar os Post-Its
+
+// Função para carregar os Post-Its da sala atual
 async function loadPostIts() {
     try {
         const response = await fetch(`http://localhost:3001/api/postIts?room=${currentRoom}`);
-        const postIts = await response.json();
+        const postItsData = await response.json();
 
-        document.getElementById('postItContainer').innerHTML = '';
-        postIts.forEach(data => {
-            const postIt = createPostItElement(data.id, data);
-            document.getElementById('postItContainer').appendChild(postIt);
+        const postItContainer = document.getElementById('postItContainer');
+        postItContainer.innerHTML = '';  // Limpa o contêiner de Post-Its
+
+        postItsData.forEach(data => {
+            const postItElement = createPostItElement(data.id, data);
+            postItContainer.appendChild(postItElement);
         });
     } catch (error) {
         console.error('Erro ao carregar Post-Its:', error);
@@ -169,6 +193,7 @@ function createPostItElement(id, data) {
     return postItElement;
 }
 
+// Funções para selecionar e atualizar a cor
 function selectColor(color) {
     selectedColor = color;
     updateColorSelection();
@@ -180,6 +205,7 @@ function updateColorSelection() {
     });
 }
 
+// Função para deletar um Post-It
 async function deletePostIt() {
     if (!editingPostIt) return;
 
@@ -198,6 +224,7 @@ async function deletePostIt() {
     closeEditModal();
 }
 
+// Função para adicionar uma nova sala
 async function addRoom(room = null) {
     const newRoom = room || prompt('Digite o nome da nova sala:');
     if (!newRoom) return;
@@ -215,29 +242,45 @@ async function addRoom(room = null) {
     }
 }
 
+// Função para trocar a sala atual
 function changeRoom(roomName) {
     currentRoom = roomName || document.getElementById('roomSelect').value;
     localStorage.setItem('currentRoom', currentRoom);
     loadPostIts();
 }
 
+// Função para excluir uma sala
 async function deleteRoom() {
     if (confirm(`Deseja realmente excluir a sala ${currentRoom}?`)) {
         try {
-            await fetch(`http://localhost:3001/api/rooms/${currentRoom}`, {
+            const response = await fetch(`http://localhost:3001/api/rooms/${currentRoom}`, {
                 method: 'DELETE',
             });
+
+            // Log da resposta para ver o que está sendo retornado
+            const text = await response.text(); // Obter como texto para ver o HTML retornado
+            console.log('Resposta do servidor:', text);
+
+            if (!response.ok) {
+                console.error(`Erro ao excluir sala: ${text}`);
+                alert(`Não foi possível excluir a sala: ${currentRoom}. Verifique se ela existe.`);
+                return;
+            }
+
+            // Recarrega as salas e atualiza a sala atual
             await loadRooms();
             const roomSelect = document.getElementById('roomSelect');
             currentRoom = roomSelect.options[0] ? roomSelect.options[0].value : 'Sala1';
             roomSelect.value = currentRoom;
             localStorage.setItem('currentRoom', currentRoom);
-            loadPostIts();
+            loadPostIts(); // Recarrega os Post-Its para a sala atual
         } catch (error) {
             console.error('Erro ao excluir sala:', error);
+            alert('Ocorreu um erro ao tentar excluir a sala.');
         }
     }
 }
+
 
 function confirmCloseModal() {
     if (confirm("Deseja salvar as alterações antes de sair?")) {
