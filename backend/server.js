@@ -11,7 +11,7 @@ const roomsRoutes = require('./routes/rooms');
 const app = express();
 const PORT = process.env.PORT || 3001;  // Usar a porta do ambiente ou 3001 como padrão
 
-// Configuração do banco de dados
+// Configuração do banco de dados (usando variáveis de ambiente)
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
