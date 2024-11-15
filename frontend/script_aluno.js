@@ -98,35 +98,74 @@ async function savePostIt() {
     const content = document.getElementById('textContent').value;
 
     const postItData = {
-        name, class: className, shift, content, color: selectedColor, room: currentRoom
+        name,
+        class: className,
+        shift,
+        content,
+        color: selectedColor,
+        room: currentRoom,
     };
 
     try {
         if (editingPostIt) {
+            // Caso de edição
             const postId = editingPostIt.dataset.id;
+
             const response = await fetch(`http://localhost:3001/api/postIts/${postId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(postItData)
+                body: JSON.stringify(postItData),
             });
 
             if (response.ok) {
-                editingPostIt.dataset.name = name;
-                editingPostIt.dataset.class = className;
-                editingPostIt.dataset.shift = shift;
-                editingPostIt.dataset.content = content;
-                editingPostIt.style.backgroundColor = selectedColor;
-                editingPostIt.querySelector('p').textContent = content;
+                const updatedPostIt = await response.json();
+
+                // Atualiza apenas se os dados necessários estiverem presentes
+                if (updatedPostIt.id && updatedPostIt.content && updatedPostIt.name) {
+                    editingPostIt.dataset.name = name;
+                    editingPostIt.dataset.class = className;
+                    editingPostIt.dataset.shift = shift;
+                    editingPostIt.dataset.content = content;
+                    editingPostIt.style.backgroundColor = selectedColor;
+                    editingPostIt.querySelector('p').textContent = content;
+                } else {
+                    console.error('Resposta incompleta ao editar Post-It:', updatedPostIt);
+                }
             } else {
                 console.error('Erro ao editar Post-It:', await response.text());
             }
+        } else {
+            // Caso de criação de um novo Post-It
+            const response = await fetch('http://localhost:3001/api/postIts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postItData),
+            });
+
+            if (response.ok) {
+                const newPostIt = await response.json();
+
+                // Verifica os dados retornados antes de criar o Post-It
+                if (newPostIt.id && newPostIt.content && newPostIt.name) {
+                    const postItContainer = document.getElementById('postItContainer');
+                    const newPostItElement = createPostItElement(newPostIt.id, newPostIt);
+                    postItContainer.appendChild(newPostItElement);
+                } else {
+                    console.error('Resposta incompleta ao criar Post-It:', newPostIt);
+                }
+            } else {
+                console.error('Erro ao criar Post-It:', await response.text());
+            }
         }
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro no savePostIt:', error);
     }
 
     closeEditModal();
 }
+
+
+
 
 // Função para criar o elemento Post-It
 function createPostItElement(id, data) {

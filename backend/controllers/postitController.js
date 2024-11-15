@@ -26,9 +26,25 @@ exports.createPostIt = (req, res) => {
             console.error('Erro ao adicionar post-it:', err.message);
             return res.status(500).json({ error: 'Erro ao adicionar post-it' });
         }
-        res.status(201).json({ id: result.insertId });
+
+        const newPostItId = result.insertId;
+
+        // Busca o Post-It completo com base no ID inserido
+        db.query('SELECT * FROM postIts WHERE id = ?', [newPostItId], (err, rows) => {
+            if (err) {
+                console.error('Erro ao buscar o post-it criado:', err.message);
+                return res.status(500).json({ error: 'Erro ao buscar o post-it criado' });
+            }
+
+            if (rows.length === 0) {
+                return res.status(404).json({ error: 'Post-it não encontrado após criação' });
+            }
+
+            res.status(201).json(rows[0]); // Retorna o Post-It completo
+        });
     });
 };
+
 
 // Função para deletar um post-it
 exports.deletePostIt = (req, res) => {
