@@ -1,79 +1,130 @@
-require('dotenv').config();  // Carrega as variáveis de ambiente do .env
-
 const express = require('express');
-const mysql = require('mysql2/promise');
+const Database = require('better-sqlite3');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const postItsRoutes = require('./routes/postits');
-const roomsRoutes = require('./routes/rooms');
 
-// Inicializando o servidor Express
 const app = express();
-const PORT = process.env.PORT || 3001;  // Usar a porta do ambiente ou 3001 como padrão
+const db = new Database('./database/database.db'); // Conexão com better-sqlite3
+const PORT = 3001;
 
-// Configuração do banco de dados (usando variáveis de ambiente)
-const dbConfig = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-};
-
-// Middleware
 app.use(cors());
-app.use(bodyParser.json());  // Permite o envio de dados no formato JSON
+app.use(bodyParser.json());
 
-// Teste de Conexão com o MySQL
-async function testConnection() {
+// Inicializa a tabela de Post-Its (criação única)
+db.prepare(`
+    CREATE TABLE IF NOT EXISTS postIts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        class TEXT,
+        shift TEXT,
+        content TEXT,
+        color TEXT,
+        room TEXT
+    )
+`).run();
+
+// Endpoint para obter post-its de uma sala
+app.get('/api/postIts', (req, res) => {
+    const room = req.query.room || 'Sala1';
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        console.log('Conexão com o MySQL bem-sucedida!');
-        await connection.end();
+        const postIts = db.prepare(`SELECT * FROM postIts WHERE room = ?`).all(room);
+        res.json(postIts);
     } catch (err) {
-        console.error('Erro ao conectar ao MySQL:', err.message);
+        console.error('Erro ao obter post-its:', err.message);
+        res.status(500).json({ error: 'Erro ao obter post-its' });
     }
-}
+});
 
-// Inicializa a tabela de Post-Its no banco de dados, caso não existam
-async function initializeDatabase() {
+// Endpoint para adicionar um novo post-it
+app.post('/api/postIts', (req, res) => {
+    const { name, class: className, shift, content, color, room } = req.body;
     try {
-        const connection = await mysql.createConnection(dbConfig);
-        await connection.query(`
-            CREATE TABLE IF NOT EXISTS postIts (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(255),
-                class VARCHAR(255),
-                shift VARCHAR(50),
-                content TEXT,
-                color VARCHAR(20),
-                room VARCHAR(255)
-            );
-        `);
-        await connection.query(`
-            CREATE TABLE IF NOT EXISTS rooms (
-                name VARCHAR(255) PRIMARY KEY
-            );
-        `);
-        console.log('Tabelas criadas ou já existentes no banco de dados.');
-        await connection.end();
+        const info = db.prepare(`
+            INSERT INTO postIts (name, class, shift, content, color, room) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `).run(name, className, shift, content, color, room);
+        
+        res.status(201).json({ id: info.lastInsertRowid, name, class: className, shift, content, color, room });
     } catch (err) {
-        console.error('Erro ao inicializar o banco de dados:', err.message);
+        console.error('Erro ao adicionar post-it:', err.message);
+        res.status(500).json({ error: 'Erro ao adicionar post-it' });
     }
-}
+});
 
-// Rota para Post-Its e Salas
-app.use('/api/postits', postItsRoutes);
-app.use('/api/rooms', roomsRoutes);
+// Novo endpoint para editar um post-it existente
+app.put('/api/postIts/:id', (req, res) => {
+    const { id } = req.params;
+    const { name, class: className, shift, content, color } = req.body;
 
-// Conectar ao banco de dados e iniciar o servidor
-async function startServer() {
-    await testConnection();  // Testa a conexão com o banco de dados
-    await initializeDatabase();  // Inicializa o banco de dados
+    try {
+        const result = db.prepare(`
+            UPDATE postIts 
+            SET name = ?, class = ?, shift = ?, content = ?, color = ? 
+            WHERE id = ?
+        `).run(name, className, shift, content, color, id);
 
-    // Inicia o servidor
-    app.listen(PORT, () => {
-        console.log(`Servidor rodando na porta ${PORT}`);
-    });
-}
+        if (result.changes > 0) {
+            res.status(200).json({ message: 'Post-It atualizado com sucesso!' });
+        } else {
+            res.status(404).json({ error: 'Post-It não encontrado' });
+        }
+    } catch (err) {
+        console.error('Erro ao editar post-it:', err.message);
+        res.status(500).json({ error: 'Erro ao editar post-it' });
+    }
+});
 
-startServer();  // Chama a função que inicia tudo
+// Endpoint para deletar um post-it
+app.delete('/api/postIts/:id', (req, res) => {
+    const { id } = req.params;
+    try {
+        db.prepare(`DELETE FROM postIts WHERE id = ?`).run(id);
+        res.status(204).send();
+    } catch (err) {
+        console.error('Erro ao deletar post-it:', err.message);
+        res.status(500).json({ error: 'Erro ao deletar post-it' });
+    }
+});
+
+// Endpoint para obter todas as salas
+app.get('/api/rooms', (req, res) => {
+    try {
+        const rooms = db.prepare(`SELECT DISTINCT room FROM postIts`).all();
+        res.json(rooms.map(row => row.room));
+    } catch (err) {
+        console.error('Erro ao obter salas:', err.message);
+        res.status(500).send({ error: 'Erro ao obter salas' });
+    }
+});
+
+// Endpoint para adicionar uma nova sala
+app.post('/api/rooms', (req, res) => {
+    const { room } = req.body;
+    if (!room) {
+        return res.status(400).json({ error: "O nome da sala não pode ser vazio." });
+    }
+    try {
+        db.prepare(`INSERT INTO postIts (room) VALUES (?)`).run(room);
+        res.status(201).json({ room });
+    } catch (err) {
+        console.error('Erro ao adicionar sala:', err.message);
+        res.status(500).json({ error: 'Erro ao adicionar sala' });
+    }
+});
+
+// Endpoint para deletar uma sala e todos os seus post-its
+app.delete('/api/rooms/:room', (req, res) => {
+    const { room } = req.params;
+    try {
+        db.prepare(`DELETE FROM postIts WHERE room = ?`).run(room);
+        res.status(204).send();
+    } catch (err) {
+        console.error('Erro ao deletar sala:', err.message);
+        res.status(500).json({ error: 'Erro ao deletar sala' });
+    }
+});
+
+// Inicia o servidor
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});

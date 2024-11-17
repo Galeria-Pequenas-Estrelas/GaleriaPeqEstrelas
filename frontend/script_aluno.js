@@ -7,27 +7,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadPostIts();
 });
 
-// Função para carregar as salas com melhorias
 async function loadRooms() {
     const roomSelect = document.getElementById('roomSelect');
     roomSelect.innerHTML = '';
 
     try {
         const response = await fetch('http://localhost:3001/api/rooms');
-        
-        // Verifica se a resposta foi bem-sucedida
-        if (!response.ok) {
-            console.error('Erro ao carregar salas:', response.statusText);
-            return;
-        }
-
-        const data = await response.json();
-        const rooms = data.rooms;
-
-        if (!Array.isArray(rooms)) {
-            console.error('Formato inesperado da resposta para salas:', rooms);
-            return;
-        }
+        const rooms = await response.json();
 
         rooms.forEach(room => {
             const option = document.createElement('option');
@@ -44,25 +30,21 @@ async function loadRooms() {
     }
 }
 
-// Função para carregar os Post-Its da sala atual
 async function loadPostIts() {
     try {
         const response = await fetch(`http://localhost:3001/api/postIts?room=${currentRoom}`);
-        const postItsData = await response.json();
+        const postIts = await response.json();
 
-        const postItContainer = document.getElementById('postItContainer');
-        postItContainer.innerHTML = '';
-
-        postItsData.forEach(data => {
-            const postItElement = createPostItElement(data.id, data);
-            postItContainer.appendChild(postItElement);
+        document.getElementById('postItContainer').innerHTML = '';
+        postIts.forEach(data => {
+            const postIt = createPostItElement(data.id, data);
+            document.getElementById('postItContainer').appendChild(postIt);
         });
     } catch (error) {
         console.error('Erro ao carregar Post-Its:', error);
     }
 }
 
-// Função para abrir o modal de edição
 function openEditModal(postIt = null) {
     editingPostIt = postIt;
 
@@ -84,13 +66,11 @@ function openEditModal(postIt = null) {
     updateColorSelection();
 }
 
-// Função para fechar o modal de edição
 function closeEditModal() {
     editingPostIt = null;
     document.getElementById('editModal').style.display = 'none';
 }
 
-// Função para salvar ou atualizar um Post-It (somente edição)
 async function savePostIt() {
     const name = document.getElementById('nameInput').value;
     const className = document.getElementById('classInput').value;
@@ -103,71 +83,53 @@ async function savePostIt() {
         shift,
         content,
         color: selectedColor,
-        room: currentRoom,
+        room: currentRoom
     };
 
     try {
         if (editingPostIt) {
-            // Caso de edição
-            const postId = editingPostIt.dataset.id;
-
+            // Edição de um Post-It existente
+            const postId = editingPostIt.dataset.id; // Pega o ID do post-it a ser editado
             const response = await fetch(`http://localhost:3001/api/postIts/${postId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(postItData),
+                body: JSON.stringify(postItData)
             });
 
             if (response.ok) {
-                const updatedPostIt = await response.json();
-
-                // Atualiza apenas se os dados necessários estiverem presentes
-                if (updatedPostIt.id && updatedPostIt.content && updatedPostIt.name) {
-                    editingPostIt.dataset.name = name;
-                    editingPostIt.dataset.class = className;
-                    editingPostIt.dataset.shift = shift;
-                    editingPostIt.dataset.content = content;
-                    editingPostIt.style.backgroundColor = selectedColor;
-                    editingPostIt.querySelector('p').textContent = content;
-                } else {
-                    console.error('Resposta incompleta ao editar Post-It:', updatedPostIt);
-                }
+                // Atualiza visualmente o post-it na página
+                editingPostIt.dataset.name = name;
+                editingPostIt.dataset.class = className;
+                editingPostIt.dataset.shift = shift;
+                editingPostIt.dataset.content = content;
+                editingPostIt.style.backgroundColor = selectedColor;
+                editingPostIt.querySelector('p').textContent = content;
             } else {
                 console.error('Erro ao editar Post-It:', await response.text());
             }
         } else {
-            // Caso de criação de um novo Post-It
+            // Criação de um novo Post-It
             const response = await fetch('http://localhost:3001/api/postIts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(postItData),
+                body: JSON.stringify(postItData)
             });
 
             if (response.ok) {
                 const newPostIt = await response.json();
-
-                // Verifica os dados retornados antes de criar o Post-It
-                if (newPostIt.id && newPostIt.content && newPostIt.name) {
-                    const postItContainer = document.getElementById('postItContainer');
-                    const newPostItElement = createPostItElement(newPostIt.id, newPostIt);
-                    postItContainer.appendChild(newPostItElement);
-                } else {
-                    console.error('Resposta incompleta ao criar Post-It:', newPostIt);
-                }
+                const postItElement = createPostItElement(newPostIt.id, postItData);
+                document.getElementById('postItContainer').appendChild(postItElement);
             } else {
-                console.error('Erro ao criar Post-It:', await response.text());
+                console.error('Erro ao salvar Post-It:', response.statusText);
             }
         }
     } catch (error) {
-        console.error('Erro no savePostIt:', error);
+        console.error('Erro:', error);
     }
 
     closeEditModal();
 }
 
-
-
-
-// Função para criar o elemento Post-It
 function createPostItElement(id, data) {
     const postIt = document.createElement('div');
     postIt.className = 'post-it';
@@ -177,7 +139,7 @@ function createPostItElement(id, data) {
     postIt.dataset.shift = data.shift;
     postIt.dataset.content = data.content;
     postIt.style.backgroundColor = data.color;
-
+    
     postIt.innerHTML = `
         <p>${data.content}</p>
         <div class="student-name">${data.name}</div>
@@ -186,7 +148,7 @@ function createPostItElement(id, data) {
     return postIt;
 }
 
-// Funções para selecionar e atualizar a cor
+
 function selectColor(color) {
     selectedColor = color;
     updateColorSelection();
@@ -198,9 +160,33 @@ function updateColorSelection() {
     });
 }
 
-// Função para trocar a sala atual
+async function addRoom() {
+    const newRoom = prompt('Digite o nome da nova sala:');
+    if (!newRoom) return;
+
+    try {
+        await fetch('http://localhost:3001/api/rooms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room: newRoom })
+        });
+        await loadRooms();
+        changeRoom(newRoom);
+    } catch (error) {
+        console.error('Erro ao adicionar sala:', error);
+    }
+}
+
 function changeRoom() {
     currentRoom = document.getElementById('roomSelect').value;
     localStorage.setItem('currentRoom', currentRoom);
     loadPostIts();
+}
+
+function confirmCloseModal() {
+    if (confirm("Deseja salvar as alterações antes de sair?")) {
+        savePostIt();
+    } else {
+        closeEditModal();
+    }
 }
