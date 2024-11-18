@@ -12,7 +12,7 @@ async function loadRooms() {
     roomSelect.innerHTML = '';
 
     try {
-        const response = await fetch('http://localhost:3001/api/rooms');
+        const response = await fetch('https://galeriapeqestrelas.onrender.com/api/rooms'); // URL ajustada para o backend hospedado no Render
         const rooms = await response.json();
 
         rooms.forEach(room => {
@@ -32,7 +32,7 @@ async function loadRooms() {
 
 async function loadPostIts() {
     try {
-        const response = await fetch(`http://localhost:3001/api/postIts?room=${currentRoom}`);
+        const response = await fetch(`https://galeriapeqestrelas.onrender.com/api/postIts?room=${currentRoom}`); // URL ajustada para o backend hospedado no Render
         const postIts = await response.json();
 
         document.getElementById('postItContainer').innerHTML = '';
@@ -90,7 +90,7 @@ async function savePostIt() {
         if (editingPostIt) {
             // Edição de um Post-It existente
             const postId = editingPostIt.dataset.id; // Pega o ID do post-it a ser editado
-            const response = await fetch(`http://localhost:3001/api/postIts/${postId}`, {
+            const response = await fetch(`https://galeriapeqestrelas.onrender.com/api/postIts/${postId}`, { // URL ajustada para o backend no Render
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(postItData)
@@ -109,7 +109,7 @@ async function savePostIt() {
             }
         } else {
             // Criação de um novo Post-It
-            const response = await fetch('http://localhost:3001/api/postIts', {
+            const response = await fetch('https://galeriapeqestrelas.onrender.com/api/postIts', { // URL ajustada para o backend no Render
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(postItData)
@@ -148,7 +148,6 @@ function createPostItElement(id, data) {
     return postIt;
 }
 
-
 function selectColor(color) {
     selectedColor = color;
     updateColorSelection();
@@ -165,7 +164,7 @@ async function addRoom() {
     if (!newRoom) return;
 
     try {
-        await fetch('http://localhost:3001/api/rooms', {
+        await fetch('https://galeriapeqestrelas.onrender.com/api/rooms', { // URL ajustada para o backend no Render
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ room: newRoom })
