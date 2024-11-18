@@ -3,9 +3,10 @@ const express = require('express');
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Configuração do pool de conexão com PostgreSQL
 const pool = new Pool({
@@ -18,6 +19,9 @@ const pool = new Pool({
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Serve arquivos estáticos da pasta raiz, onde o index.html está
+app.use(express.static(path.join(__dirname, '../')));
 
 // Função auxiliar para consulta ao banco de dados
 const queryDB = async (query, params = []) => {
@@ -49,6 +53,11 @@ const queryDB = async (query, params = []) => {
         console.error('Erro ao inicializar a tabela:', err.message);
     }
 })();
+
+// Rota para servir o arquivo index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../index.html')); // Caminho do index.html na raiz do projeto
+});
 
 // Endpoint para obter post-its de uma sala
 app.get('/api/postIts', async (req, res) => {
