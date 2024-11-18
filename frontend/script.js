@@ -40,7 +40,7 @@ async function loadRooms() {
     roomSelect.innerHTML = '';
 
     try {
-        const response = await fetch('http://localhost:3001/api/rooms');
+        const response = await fetch('https://galeriapeqestrelas.onrender.com/api/rooms'); // URL do backend no Render
         const rooms = await response.json();
 
         rooms.forEach(room => {
@@ -61,7 +61,7 @@ async function loadRooms() {
 // Função para carregar os Post-Its
 async function loadPostIts() {
     try {
-        const response = await fetch(`http://localhost:3001/api/postIts?room=${currentRoom}`);
+        const response = await fetch(`https://galeriapeqestrelas.onrender.com/api/postIts?room=${currentRoom}`); // URL do backend no Render
         const postIts = await response.json();
 
         document.getElementById('postItContainer').innerHTML = '';
@@ -122,7 +122,7 @@ async function savePostIt() {
             editingPostIt.style.backgroundColor = selectedColor;
             editingPostIt.querySelector('p').textContent = content;
         } else {
-            const response = await fetch('http://localhost:3001/api/postIts', {
+            const response = await fetch('https://galeriapeqestrelas.onrender.com/api/postIts', { // URL do backend no Render
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(postItData),
@@ -185,7 +185,7 @@ async function deletePostIt() {
 
     const postId = editingPostIt.dataset.id;
     try {
-        const response = await fetch(`http://localhost:3001/api/postIts/${postId}`, { method: 'DELETE' });
+        const response = await fetch(`https://galeriapeqestrelas.onrender.com/api/postIts/${postId}`, { method: 'DELETE' }); // URL do backend no Render
         if (response.ok) {
             editingPostIt.remove();
         } else {
@@ -203,7 +203,7 @@ async function addRoom(room = null) {
     if (!newRoom) return;
 
     try {
-        await fetch('http://localhost:3001/api/rooms', {
+        await fetch('https://galeriapeqestrelas.onrender.com/api/rooms', { // URL do backend no Render
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ room: newRoom }),
@@ -224,7 +224,7 @@ function changeRoom(roomName) {
 async function deleteRoom() {
     if (confirm(`Deseja realmente excluir a sala ${currentRoom}?`)) {
         try {
-            await fetch(`http://localhost:3001/api/rooms/${currentRoom}`, {
+            await fetch(`https://galeriapeqestrelas.onrender.com/api/rooms/${currentRoom}`, { // URL do backend no Render
                 method: 'DELETE',
             });
             await loadRooms();
