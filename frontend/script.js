@@ -40,7 +40,8 @@ async function loadRooms() {
     roomSelect.innerHTML = '';
 
     try {
-        const response = await fetch('https://galeriapeqestrelas.onrender.com/api/rooms'); // URL do backend no Render
+        // Ajuste da URL para o backend no Render
+        const response = await fetch('https://galeriapeqestrelas.onrender.com/api/rooms'); // URL do backend
         const rooms = await response.json();
 
         rooms.forEach(room => {
